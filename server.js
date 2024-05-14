@@ -6,6 +6,11 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql');
 const { check, validationResult } = require('express-validator');
 const app = express();
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+const port = process.env.PORT;
 
 // Configure session middleware
 app.use(session({
@@ -15,11 +20,11 @@ app.use(session({
 }));
 
 // Create MySQL connection
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'Tyano',
-    database: 'learning_management'
+const db = mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE
 });
 
 connection.connect();
@@ -32,6 +37,34 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(session({
+    secret: 'rgfgghdhethhhdkjgruffhghsghgdg',
+    resave: false,
+    saveUninitialized: true
+}));
+
+app.post('/login', (req, res) =>{
+    if(validLogin){
+        req.session.username = username;
+        req.session.email = email;
+        req.session.successfulLogin = true;
+    } else {
+        res.redirect('/login');
+
+    }
+
+});
+
+// securing routes
+const isAuthenticated = (req, res) => {
+    if(req.session.successfulLogin){
+        next();
+    } else {
+        res.redirect('/login');
+    }
+
+}
 
 // Define routes
 app.get('/', (req, res) => {
